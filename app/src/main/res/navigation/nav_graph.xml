@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/BlockedFragment">
+
+    <fragment
+        android:id="@+id/BlockedFragment"
+        android:name="com.mathandcsnerd.callblocker.fragments.BlockedNumbersFragment"
+        android:label="@string/blocked_fragment_label"
+        tools:layout="@layout/blocked_numbers_fragment">
+
+        <action
+            android:id="@+id/action_BlockedFragment_To_Next"
+            app:destination="@id/AllowedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/AllowedFragment"
+        android:name="com.mathandcsnerd.callblocker.fragments.AllowedNumbersFragment"
+        android:label="@string/allowed_fragment_label"
+        tools:layout="@layout/allowed_numbers_fragment">
+
+        <action
+            android:id="@+id/action_AllowedFragment_To_Previous"
+            app:destination="@id/BlockedFragment" />
+        <action
+            android:id="@+id/action_AllowedFragment_To_Next"
+            app:destination="@id/RejectedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/RejectedFragment"
+        android:name="com.mathandcsnerd.callblocker.fragments.RejectedCallsFragment"
+        android:label="@string/rejected_fragment_label">
+        <action
+            android:id="@+id/action_RejectedFragment_To_Previous"
+            app:destination="@id/AllowedFragment" />
+    </fragment>
+</navigation>

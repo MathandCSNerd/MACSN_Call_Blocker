@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Simple Call-Blocker</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="blocked_fragment_label">Blocked Numbers Fragment</string>
+    <string name="allowed_fragment_label">Allowed Numbers Fragment</string>
+    <string name="rejected_fragment_label">Rejected Calls Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+</resources>

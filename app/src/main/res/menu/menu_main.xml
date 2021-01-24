@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.mathandcsnerd.callblocker.MainActivity">
+    <item
+        android:id="@+id/options_refresh_contacts"
+        android:orderInCategory="100"
+        android:title="Refresh Contacts"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/options_whitelist_contacts"
+        android:orderInCategory="100"
+        android:title="Whitelist Contacts: true"
+        app:showAsAction="never" />
+</menu>
