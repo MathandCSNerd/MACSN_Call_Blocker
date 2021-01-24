@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
             phoneData.toggleContactsBool();
 
-            item.setTitle("Whitelist Contacts: "
+            item.setTitle("Allow Contacts: "
                     + phoneData.getContactsBool());
 
         }

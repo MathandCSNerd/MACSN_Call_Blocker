@@ -10,6 +10,6 @@
     <item
         android:id="@+id/options_whitelist_contacts"
         android:orderInCategory="100"
-        android:title="Whitelist Contacts: true"
+        android:title="Allow Contacts: true"
         app:showAsAction="never" />
 </menu>
