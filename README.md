@@ -18,7 +18,7 @@ I didn't add anything fancy to the build system for the same reasons stated abov
 # Usage
 As I said before, the UI is very minimalistic.
 
-Upon the original launch of the application, it will make the permissions request to the android os and, assuming it didn't already have the permissions granted, it will close.
+Upon the original launch of the application, it will make the permissions requests to the android os and, assuming it didn't already have the permissions granted, it will close.
 
 When launched with the proper permissions granted, it will bring up the "Blocked Numbers" list. To navigate to the other lists, simply use the "next" and "previous" buttons.
 
@@ -26,8 +26,11 @@ To add a number to the list simply type it in the box and click the square butto
 
 To remove a number from any list, simply tap it.
 
+There is a drop down menu where you can choose to temporarily stop blocking, (dis)allow contacts, or refresh the contacts list from the phone.
+
 
 # Blocking Rules
+If the blocking is currently disabled (by the menu option), it will be allowed.
 If the number is not on the blocklist, it will be allowed.
 If the number is on the blocklist, and it is on the allowed list, it will still be allowed.
 If the number is on the blocklist, and it is in the phone's contacts list and the option to "Allow Contacts" is set to true, it will still be allowed.
