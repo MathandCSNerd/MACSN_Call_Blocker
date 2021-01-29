@@ -203,7 +203,7 @@ public class PhoneNumberDataTest {
     @Test
     public void testContactsGood() {
         _setupContacts(new HashSet<String>(Collections.singleton("5122251243")));
-        testData.setContactsBool(true);
+        testData.setContactsAreAllowed(true);
         testData.refreshContacts();
 
         assertTrue(testData.addNumberToBlockList("512*"));
@@ -215,7 +215,7 @@ public class PhoneNumberDataTest {
     @Test
     public void testStarBlocksAll() {
         _setupContacts(new HashSet<String>(Collections.singleton("5122251243")));
-        testData.setContactsBool(true);
+        testData.setContactsAreAllowed(true);
         testData.refreshContacts();
 
         assertTrue(testData.addNumberToBlockList("*"));
@@ -231,7 +231,7 @@ public class PhoneNumberDataTest {
     @Test
     public void testContactCallWithPlus() {
         _setupContacts(new HashSet<String>(Collections.singleton("1234525346")));
-        testData.setContactsBool(true);
+        testData.setContactsAreAllowed(true);
         testData.refreshContacts();
 
         assertTrue(testData.addNumberToBlockList("*"));
@@ -245,4 +245,43 @@ public class PhoneNumberDataTest {
         assertFalse(testData.numIsBlocked("+1234525346"));
 
     }
+
+    @Test
+    public void testDisableBlocking() {
+        testData.setBlockingIsDisabled(true);
+
+        assertTrue(testData.addNumberToBlockList("+15081234345"));
+        assertTrue(testData.addNumberToBlockList("5081264345"));
+        assertTrue(testData.addNumberToBlockList("5184235"));
+
+        assertTrue(testData.addNumberToBlockList("*1534321"));
+        assertTrue(testData.addNumberToBlockList("548*4412"));
+        assertTrue(testData.addNumberToBlockList("878*1452"));
+        assertTrue(testData.addNumberToBlockList("5*5"));
+        assertTrue(testData.addNumberToBlockList("+1*1234345"));
+        assertTrue(testData.addNumberToBlockList("503234????"));
+        assertTrue(testData.addNumberToBlockList("5032????34"));
+        assertTrue(testData.addNumberToBlockList("523*4????"));
+
+        assertFalse(testData.numIsBlocked("+115081234145"));
+        assertFalse(testData.numIsBlocked("5444212442"));
+        assertFalse(testData.numIsBlocked("+15444212442"));
+        assertFalse(testData.numIsBlocked("+115444212442"));
+        assertFalse(testData.numIsBlocked("8781244211252"));
+        assertFalse(testData.numIsBlocked("503234"));
+        assertFalse(testData.numIsBlocked("50323423"));
+        assertFalse(testData.numIsBlocked("503234"));
+        assertFalse(testData.numIsBlocked("503234134"));
+        assertFalse(testData.numIsBlocked("52334434"));
+
+        assertFalse(testData.numIsBlocked("1281534321"));
+        assertFalse(testData.numIsBlocked("5484324412"));
+        assertFalse(testData.numIsBlocked("8784321452"));
+        assertFalse(testData.numIsBlocked("51255761435"));
+        assertFalse(testData.numIsBlocked("+1421234345"));
+        assertFalse(testData.numIsBlocked("5032343452"));
+        assertFalse(testData.numIsBlocked("5032345234"));
+        assertFalse(testData.numIsBlocked("5231235234541234"));
+    }
+
 }

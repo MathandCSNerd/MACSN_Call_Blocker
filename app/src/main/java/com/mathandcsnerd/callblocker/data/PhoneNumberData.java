@@ -26,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PhoneNumberData implements BlockListCallback {
+public class PhoneNumberData extends MenuOptionsData implements BlockListCallback {
     //these get listed in another view
     public ArrayList<String> blockList;
     public ArrayList<String> whiteList;
@@ -47,8 +48,6 @@ public class PhoneNumberData implements BlockListCallback {
     private List<String> contactList;
 
     private final Set<Character> validChars;
-
-    private boolean allowContacts = true;
 
     private final String blockListFilename = "numbers";
     private final String whiteListFilename = "whitelist";
@@ -60,16 +59,6 @@ public class PhoneNumberData implements BlockListCallback {
     private final Handler handler;
 
     private final ContactsGrabber contactsGrabber;
-
-    public void toggleContactsBool(){
-        allowContacts = !allowContacts;
-    }
-    public void setContactsBool(boolean val){
-        allowContacts = val;
-    }
-    public boolean getContactsBool(){
-        return allowContacts;
-    }
 
     public void refreshContacts(){
         contactList = new LinkedList<>();
@@ -83,6 +72,7 @@ public class PhoneNumberData implements BlockListCallback {
     }
 
     public PhoneNumberData(Context context, ContactsGrabber grabber){
+        super(context);
         validChars = new HashSet<Character>();
         myContext = context;
 
@@ -90,8 +80,6 @@ public class PhoneNumberData implements BlockListCallback {
         whiteList = new ArrayList<String>();
         rejectedList = new ArrayList<String>();
 
-        //by default, whitelist contacts
-        allowContacts = true;
         contactsGrabber = grabber;
         refreshContacts();
 
@@ -184,9 +172,11 @@ public class PhoneNumberData implements BlockListCallback {
     }
 
     public boolean numIsBlocked(String num){
+        if(blockingIsDisabled())
+            return false;
         if(!_numMatchesBlockList(num))
             return false;
-        if(getContactsBool() && _numIsContact(num))
+        if(contactsAreAllowed() && _numIsContact(num))
             return false;
         if(_numMatchesWhiteList(num))
             return false;
@@ -259,9 +249,8 @@ public class PhoneNumberData implements BlockListCallback {
     private void loadListFromFile(String fname, Consumer<String> addToListMethod){
         File sfile = new File(myContext.getFilesDir(), fname);
 
-        String line;
-
         try (BufferedReader reader = new BufferedReader(new FileReader(sfile))){
+            String line;
             line = reader.readLine();
             while(line != null) {
                 addToListMethod.accept(line);
@@ -274,7 +263,7 @@ public class PhoneNumberData implements BlockListCallback {
 
     }
 
-    public void loadLists(){
+    private void loadLists(){
         loadListFromFile(blockListFilename, this::_addToBlockListNoSave);
         loadListFromFile(whiteListFilename, this::_addToWhiteListNoSave);
         loadListFromFile(rejectedListFilename, this::_addToRejectedListNoSave);

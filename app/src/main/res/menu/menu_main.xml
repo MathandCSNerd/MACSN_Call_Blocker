@@ -10,6 +10,11 @@
     <item
         android:id="@+id/options_whitelist_contacts"
         android:orderInCategory="100"
-        android:title="Allow Contacts: true"
+        android:title="Allow Contacts: ERROR"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/options_disable_app"
+        android:orderInCategory="100"
+        android:title="Disable Blocking: ERROR"
         app:showAsAction="never" />
 </menu>

@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.mathandcsnerd.callblocker.data.MenuOptionsData;
 import com.mathandcsnerd.callblocker.data.PhoneNumberData;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -67,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         phoneData = new PhoneNumberData(getApplicationContext());
         CallReceiver.setCallback(phoneData);
         CallReceiver.setupTelecom(getApplicationContext());
-        phoneData.setContactsBool(true);
 
         blockListAdapter    = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, phoneData.blockList);
         whiteListAdapter    = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, phoneData.whiteList);
@@ -106,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuItem contactItem = menu.findItem(R.id.options_whitelist_contacts);
+        contactItem.setTitle("Allow Contacts: "
+                + phoneData.contactsAreAllowed());
+
+        MenuItem disableItem = menu.findItem(R.id.options_disable_app);
+        disableItem.setTitle("Disable Blocking: "
+                + phoneData.blockingIsDisabled());
+
         return true;
     }
 
@@ -125,12 +134,16 @@ public class MainActivity extends AppCompatActivity {
         //this is to toggle whether or not contacts are whitelisted
         //automatically
         if (id == R.id.options_whitelist_contacts) {
-
-            phoneData.toggleContactsBool();
-
+            phoneData.toggleContactsAreAllowed();
             item.setTitle("Allow Contacts: "
-                    + phoneData.getContactsBool());
+                    + phoneData.contactsAreAllowed());
+        }
 
+        //this is to toggle on/off all blocking
+        if (id == R.id.options_disable_app) {
+            phoneData.toggleBlockingIsDisabled();
+            item.setTitle("Disable Blocking: "
+                    + phoneData.blockingIsDisabled());
         }
 
         return super.onOptionsItemSelected(item);
