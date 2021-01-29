@@ -30,7 +30,7 @@ There is a drop down menu where you can choose to temporarily stop blocking, (di
 
 
 # Blocking Rules
-If the blocking is currently disabled (by the menu option), it will be allowed.
+If blocking is currently disabled (by the menu option), it will be allowed.
 
 If the number is not on the blocklist, it will be allowed.
 
@@ -42,4 +42,4 @@ Otherwise, the number will be blocked.
 
 The blocking/allowing lists both support the * and ? wildcards which function similar to the ones in GNU's Bash. For example, adding just the entry \"*\" to the allow list will allow all numbers, whereas adding "555555????" will allow all numbers starting with 555-5555. On the other hand, adding \"*\" to the block list causes all numbers to be blocked unless they are on the allow list or contacts.
 
-When incoming call is identified as a blocked number, the call is disconnected and the incoming number is added to the "Rejected Numbers" list.
+When an incoming call is identified as a blocked number, the call is disconnected and the incoming number is added to the "Rejected Numbers" list.
