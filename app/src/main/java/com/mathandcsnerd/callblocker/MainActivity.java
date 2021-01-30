@@ -85,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
                 EditText et = findViewById(R.id.inputDialog);
                 phoneData.addNumberToBlockList(et.getText().toString());
                 blockListAdapter.notifyDataSetChanged();
-                phoneData.saveBlockList();
             }
         });
 
@@ -96,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
                 EditText et = findViewById(R.id.inputDialog);
                 phoneData.addNumberToWhiteList(et.getText().toString());
                 whiteListAdapter.notifyDataSetChanged();
-                phoneData.saveWhiteList();
             }
         });
 

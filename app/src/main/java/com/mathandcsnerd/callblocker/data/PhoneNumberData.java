@@ -20,38 +20,31 @@
 package com.mathandcsnerd.callblocker.data;
 
 import android.content.Context;
-import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import android.os.Handler;
 
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
+import com.mathandcsnerd.callblocker.data.persistence.PersistentNumberList;
+
 import java.util.regex.Pattern;
 
 public class PhoneNumberData extends MenuOptionsData implements BlockListCallback {
     //these get listed in another view
+    private final String blockListFilename = "numbers";
+    private final String whiteListFilename = "whitelist";
+    private final String rejectedListFilename = "rejectedlist";
+
+    private final PersistentNumberList persistentBlockList;
+    private final PersistentNumberList persistentWhiteList;
+    private final PersistentNumberList persistentRejectedList;
+
     public ArrayList<String> blockList;
     public ArrayList<String> whiteList;
     public ArrayList<String> rejectedList;
 
-    private List<String> contactList;
-
-    private final Set<Character> validChars;
-
-    private final String blockListFilename = "numbers";
-    private final String whiteListFilename = "whitelist";
-    private final String rejectedListFilename = "rejectedlist";
+    private ArrayList<Pattern> contactPatterns;
 
     private final String TAG = "PhoneNumberData";
 
@@ -61,10 +54,11 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
     private final ContactsGrabber contactsGrabber;
 
     public void refreshContacts(){
-        contactList = new LinkedList<>();
+        contactPatterns = new ArrayList<>();
+
         Set<String> tmpContactList = contactsGrabber.getContacts(myContext);
         for(String val: tmpContactList)
-            contactList.add("*"+val);
+            contactPatterns.add(WildcardMatcherFactory.getPattern("*" + val));
     }
 
     public PhoneNumberData(Context context){
@@ -72,201 +66,61 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
     }
 
     public PhoneNumberData(Context context, ContactsGrabber grabber){
-        super(context);
-        validChars = new HashSet<Character>();
+        super(context.getFilesDir());
         myContext = context;
+        File filesDir = myContext.getFilesDir();
 
-        blockList = new ArrayList<String>();
-        whiteList = new ArrayList<String>();
-        rejectedList = new ArrayList<String>();
+        persistentBlockList = new PersistentNumberList(new File(filesDir, blockListFilename), true);
+        persistentWhiteList = new PersistentNumberList(new File(filesDir, whiteListFilename), true);
+        persistentRejectedList = new PersistentNumberList(new File(filesDir, rejectedListFilename), false);
+
+        blockList    = persistentBlockList.numberList;
+        whiteList    = persistentWhiteList.numberList;
+        rejectedList = persistentRejectedList.numberList;
 
         contactsGrabber = grabber;
         refreshContacts();
 
-        Character [] chars = {'?','+','*','1','2','3','4','5','6','7','8','9','0'};
-        validChars.addAll(Arrays.asList(chars));
-
         handler = new Handler();
-
-        loadLists();
     }
 
     public boolean addNumberToBlockList(String num){
-        boolean result = _addToBlockListNoSave(num);
-        _appendStringToFile(num, blockListFilename);
-        return result;
+        return persistentBlockList.addNumberToList(num);
     }
 
     public boolean addNumberToWhiteList(String num){
-        boolean result = _addToWhiteListNoSave(num);
-        _appendStringToFile(num, whiteListFilename);
-        return result;
-    }
-
-    public synchronized boolean addNumberToRejectedList(String num){
-        boolean result = _addToRejectedListNoSave(num);
-        _appendStringToFile(num, rejectedListFilename);
-        return result;
+        return persistentWhiteList.addNumberToList(num);
     }
 
     public void removeNumberFromBlockList(String num){
-        blockList.remove(num);
-        saveBlockList();
+        persistentBlockList.removeNumberFromList(num);
     }
 
     public void removeNumberFromWhiteList(String num){
-        whiteList.remove(num);
-        saveWhiteList();
+        persistentWhiteList.removeNumberFromList(num);
     }
 
     public void removeNumberFromRejectedList(String num){
-        rejectedList.remove(num);
-        saveRejectedList();
+        persistentRejectedList.removeNumberFromList(num);
     }
 
-    private boolean _addToBlockListNoSave(String num){
-        if(!_validateNumber(num))
-            return false;
-        if(!blockList.contains(num))
-            blockList.add(num);
-        return true;
-    }
-
-    private boolean _addToWhiteListNoSave(String num){
-        if(!_validateNumber(num))
-            return false;
-        if(!whiteList.contains(num))
-            whiteList.add(num);
-        return true;
-    }
-
-    private synchronized boolean _addToRejectedListNoSave(String num){
-        return rejectedList.add(num);
-    }
-
-    private void _appendStringToFile(String str, String fname) {
-        File sfile = new File(myContext.getFilesDir(), fname);
-
-        try(FileOutputStream fos = new FileOutputStream(sfile, false)) {
-            fos.write(("\n"+str).getBytes());
-        }catch (Exception e) {
-            //if there's an error, or the file doesn't exist, just give up
-            Log.e(TAG, e.toString());
-        }
-    }
-
-    private boolean _numIsInList(String num, Iterable<String> list){
-        for(String val: list)
-            if(_numMatchesEntry(num, val))
+    private boolean _numIsContact(String num){
+        for(Pattern pat: contactPatterns)
+            if(pat.matcher(num).find())
                 return true;
         return false;
-    }
-    private boolean _numMatchesBlockList(String num){
-        return _numIsInList(num, blockList);
-    }
-    private boolean _numMatchesWhiteList(String num){
-        return _numIsInList(num, whiteList);
-    }
-    private boolean _numIsContact(String num){
-        return _numIsInList(num, contactList);
     }
 
     public boolean numIsBlocked(String num){
         if(blockingIsDisabled())
             return false;
-        if(!_numMatchesBlockList(num))
+        if(!persistentBlockList.numIsInList(num))
             return false;
         if(contactsAreAllowed() && _numIsContact(num))
             return false;
-        if(_numMatchesWhiteList(num))
+        if(persistentWhiteList.numIsInList(num))
             return false;
         return true;
-    }
-
-    private boolean _numMatchesEntry(String num, String entry) {
-        /*
-        there's no point in using regex within these constraints,
-        so I've decided to just use a small set of wildcards
-         */
-        String regStr = entry;
-        regStr= regStr.replace("+", "\\+");
-        regStr = regStr.replace("*",".*");
-        regStr = regStr.replace("?",".");
-        regStr = "^" + regStr + "$";
-        Pattern regex = Pattern.compile(regStr);
-        Matcher m = regex.matcher(num);
-        return m.find();
-    }
-
-    private boolean _validateNumber(String num) {
-        if (num.length() == 0)
-            return false;
-        if (num.contains("**"))
-            return false;
-        if (num.contains("++"))
-            return false;
-
-        char[] numArr = num.toCharArray();
-
-        for(int i = 0; i < numArr.length; ++i) {
-            char c = numArr[i];
-            if (!validChars.contains(c))
-                return false;
-        }
-        return true;
-    }
-
-    public void saveNumListToFile(ArrayList<String> numList, String fname){
-        String strs = Arrays.toString(numList.toArray())
-                .replace(", ", "\n")
-                .replace("[", "")
-                .replace("]", "");
-
-        File sfile = new File(myContext.getFilesDir(), fname);
-
-        myContext.getFilesDir().mkdir();
-
-        try(FileOutputStream fos = new FileOutputStream(sfile, false)) {
-            fos.write(strs.getBytes());
-        }catch (Exception e) {
-            //if there's an error, or the file doesn't exist, just give up
-            Log.e(TAG, e.toString());
-        }
-    }
-
-    public synchronized void saveBlockList() {
-        saveNumListToFile(blockList, blockListFilename);
-    }
-
-    public synchronized void saveWhiteList() {
-        saveNumListToFile(whiteList, whiteListFilename);
-    }
-
-    public synchronized void saveRejectedList(){
-        saveNumListToFile(rejectedList, rejectedListFilename);
-    }
-
-    private void loadListFromFile(String fname, Consumer<String> addToListMethod){
-        File sfile = new File(myContext.getFilesDir(), fname);
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(sfile))){
-            String line;
-            line = reader.readLine();
-            while(line != null) {
-                addToListMethod.accept(line);
-                line = reader.readLine();
-            }
-        } catch (Exception e) {
-            //if there's an error, or the file doesn't exist, just start fresh
-            Log.e(TAG, e.toString());
-        }
-
-    }
-
-    private void loadLists(){
-        loadListFromFile(blockListFilename, this::_addToBlockListNoSave);
-        loadListFromFile(whiteListFilename, this::_addToWhiteListNoSave);
-        loadListFromFile(rejectedListFilename, this::_addToRejectedListNoSave);
     }
 
     @Override
@@ -282,8 +136,7 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
                     //
                     //I'll probably come back and fix this design
                     //later though
-                    addNumberToRejectedList(str);
-                    saveRejectedList();
+                    persistentRejectedList.addNumberToList(str);
                 }
             });
         }
