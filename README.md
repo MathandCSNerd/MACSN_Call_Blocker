@@ -26,6 +26,8 @@ To add a number to the list simply type it in the box and click the square butto
 
 To remove a number from any list, simply tap it.
 
+To move a number from the rejected list to the whitelist, tap and hold it on the rejected list until it disappears.
+
 There is a drop down menu where you can choose to temporarily stop blocking, (dis)allow contacts, or refresh the contacts list from the phone.
 
 

@@ -68,6 +68,14 @@ public class RejectedCallsFragment extends Fragment {
             phoneData.removeNumberFromRejectedList(str);
             arrayAdapter.notifyDataSetChanged();
         });
+
+        numListView.setOnItemLongClickListener((parent, argView, position, id) -> {
+            String str = parent.getItemAtPosition(position).toString();
+            phoneData.addNumberToWhiteList(str);
+            phoneData.removeNumberFromRejectedList(str);
+            arrayAdapter.notifyDataSetChanged();
+            return true;
+        });
         numListView.setClickable(true);
     }
 }
