@@ -6,7 +6,6 @@ The reason I decided to create this, is due to my complete disatisfaction with s
 The UI is about as minimalistic as it gets since I didn't want to spend too much time on this little project. Considering java android development is not something I've done much of, I didn't really want to do anything more ambitious than the bare minimum required.
 
 
-
 # Building
 To build the project, just use something like:
 
@@ -45,3 +44,7 @@ Otherwise, the number will be blocked.
 The blocking/allowing lists both support the * and ? wildcards which function similar to the ones in GNU's Bash. For example, adding just the entry \"*\" to the allow list will allow all numbers, whereas adding "555555????" will allow all numbers starting with 555-5555. On the other hand, adding \"*\" to the block list causes all numbers to be blocked unless they are on the allow list or contacts.
 
 When an incoming call is identified as a blocked number, the call is disconnected and the incoming number is added to the "Rejected Numbers" list.
+
+
+# Known Limitations
+Currently the way this is written is very much tailored to someone with a phone number from north-america (prefix +1). This is due to the need to compare different formats for the same phone number like "+1-555-555-5555" and "555-555-5555". Since I don't plan to move outside the US anytime soon, I don't plan on putting much effort into fixing this bug.
