@@ -60,7 +60,7 @@ public class PersistentNumberList {
         loadListFromFile();
     }
 
-    private boolean _validateNumber(String num) {
+    private static boolean _validateNumber(String num) {
         if (num.length() == 0)
             return false;
         if (num.contains("**"))
@@ -79,18 +79,29 @@ public class PersistentNumberList {
     }
 
     public synchronized boolean addNumberToList(String num) {
+        num = _normalizeListNum(num);
         boolean result = _addToListNoSave(num);
         _appendStringToFile(num);
         return result;
     }
 
-    public void removeNumberFromList(String num) {
+    public synchronized void removeNumberFromList(String num) {
+        num = _normalizeListNum(num);
         numberList.remove(num);
         numberPatterns.remove(num);
         saveNumListToFile();
     }
 
-    private boolean _addToListNoSave(String num) {
+    static private String _normalizeListNum(String number) {
+        if (number.startsWith("+1"))
+            number = number.substring(2);
+        else if (number.startsWith("1"))
+            number = number.substring(1);
+        return number;
+    }
+
+    private synchronized boolean _addToListNoSave(String num) {
+        num = _normalizeListNum(num);
         if (isFiltered) {
             if (!_validateNumber(num))
                 return false;
@@ -104,14 +115,15 @@ public class PersistentNumberList {
         return true;
     }
 
-    public boolean numIsInList(String num) {
+    public synchronized boolean numIsInList(String num) {
         for (Pattern val : numberPatterns.values())
             if (val.matcher(num).find())
                 return true;
         return false;
     }
 
-    private void _appendStringToFile(String str) {
+    private synchronized void _appendStringToFile(String str) {
+        str = _normalizeListNum(str);
         try (FileOutputStream fos = new FileOutputStream(saveFile, true)) {
             fos.write(("\n" + str).getBytes());
         } catch (Exception e) {
@@ -120,7 +132,7 @@ public class PersistentNumberList {
         }
     }
 
-    public void saveNumListToFile() {
+    public synchronized void saveNumListToFile() {
         String strs = Arrays.toString(numberList.toArray())
                 .replace(", ", "\n")
                 .replace("[", "")
@@ -134,7 +146,7 @@ public class PersistentNumberList {
         }
     }
 
-    private void loadListFromFile() {
+    private synchronized void loadListFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader(saveFile))) {
             String line;
             line = reader.readLine();

@@ -58,7 +58,7 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
 
         Set<String> tmpContactList = contactsGrabber.getContacts(myContext);
         for(String val: tmpContactList)
-            contactPatterns.add(WildcardMatcherFactory.getPattern("*" + val));
+            contactPatterns.add(WildcardMatcherFactory.getPattern(val));
     }
 
     public PhoneNumberData(Context context){
@@ -112,6 +112,7 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
     }
 
     public boolean numIsBlocked(String num){
+        num = _normalizeIncoming(num);
         if(blockingIsDisabled())
             return false;
         if(!persistentBlockList.numIsInList(num))
@@ -123,6 +124,14 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
         return true;
     }
 
+    static private String _normalizeIncoming(String number) {
+        if (number.startsWith("+1"))
+            number = number.substring(2);
+        else if (number.startsWith("1"))
+            number = number.substring(1);
+        return number;
+    }
+
     @Override
     public boolean isOnBlocklist(String str) {
         boolean blocked = numIsBlocked(str);
@@ -130,13 +139,7 @@ public class PhoneNumberData extends MenuOptionsData implements BlockListCallbac
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    //since I'm guaranteed that the last thread will
-                    //end with a save, and both of these methods are
-                    //synchronized, there's no race condition.
-                    //
-                    //I'll probably come back and fix this design
-                    //later though
-                    persistentRejectedList.addNumberToList(str);
+                    persistentRejectedList.addNumberToList(_normalizeIncoming(str));
                 }
             });
         }

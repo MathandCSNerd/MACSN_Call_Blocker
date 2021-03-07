@@ -39,16 +39,16 @@ public class PersistentBoolean {
         load();
     }
 
-    public void setVal(boolean val) {
+    public synchronized void setVal(boolean val) {
         currVal = val;
         save();
     }
 
-    public boolean getVal() {
+    public synchronized boolean getVal() {
         return currVal;
     }
 
-    public void save() {
+    public synchronized void save() {
         String str = Boolean.toString(currVal);
 
         try (FileOutputStream fos = new FileOutputStream(saveFile, false)) {
@@ -59,7 +59,7 @@ public class PersistentBoolean {
         }
     }
 
-    private boolean getBoolFromFile() throws IOException {
+    private synchronized boolean getBoolFromFile() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(saveFile))) {
             String line;
             line = reader.readLine();
@@ -67,7 +67,7 @@ public class PersistentBoolean {
         }
     }
 
-    private void load() {
+    private synchronized void load() {
         try {
             if (saveFile.exists())
                 currVal = (getBoolFromFile());

@@ -38,11 +38,14 @@ public class ContactsGrabber {
       apparently it gives the contacts however they were
       typed in the interface. probably an implementation
       detail for the vendor
-     */
-    private String _normalizeContact(String contact){
-        if (contact.startsWith("+1"))
-            contact = contact.substring(2);
 
+      Seeing as how I don't know anyone outside the US + EU,
+      I can safely assume that a "1" at the start of the number
+      is the common country prefix under the North American
+      Numbering Plan. Therefore, I'm just going to strip that
+      for simplicity.
+     */
+    public static String _normalizeContact(String contact){
         int numericSign = contact.indexOf("#");
         if(numericSign > 0)
           contact = contact.substring(0,numericSign);
@@ -51,13 +54,18 @@ public class ContactsGrabber {
         if(comma > 0)
           contact = contact.substring(0,comma);
 
-        StringBuilder retStr = new StringBuilder();
+        StringBuilder retStrBuilder = new StringBuilder();
         for(char c : contact.toCharArray()){
             if(isDigit(c)) {
-                retStr.append(c);
+                retStrBuilder.append(c);
             }
         }
-        return retStr.toString();
+        String retStr = retStrBuilder.toString();
+
+        if (retStr.startsWith("1"))
+            retStr = retStr.substring(1);
+
+        return retStr;
     }
 
     public Set<String> getContacts(Context context){
